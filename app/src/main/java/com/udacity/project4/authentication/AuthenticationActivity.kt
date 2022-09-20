@@ -24,9 +24,7 @@ class AuthenticationActivity : AppCompatActivity() {
 
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
-    ) { result: FirebaseAuthUIAuthenticationResult ->
-        Log.d(TAG, "registerForActivityResult")
-        this.onSignInResult(result)
+    ) { _: FirebaseAuthUIAuthenticationResult ->
     }
 
 

@@ -40,7 +40,6 @@ class ReminderListFragment : BaseFragment() {
 
         binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
 
-        observeAuthenticationState()
 
         return binding.root
     }
@@ -97,21 +96,13 @@ class ReminderListFragment : BaseFragment() {
         val user = FirebaseAuth.getInstance().currentUser?.displayName
         FirebaseAuth.getInstance().signOut()
         Log.d(TAG, "User $user Logged out successfully")
+        //  Go to Login screen
+        val intent = Intent(requireActivity(), AuthenticationActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
     }
 
-    private fun observeAuthenticationState() {
-        _viewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
-            if (authenticationState == RemindersListViewModel.AuthenticationState.UNAUTHENTICATED) {
-                //  Go to Login screen
-                val intent = Intent(requireActivity(), AuthenticationActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
 
-            }
-
-        })
-
-    }
 
     companion object {
         private var TAG = ReminderListFragment::class.java.simpleName
