@@ -25,16 +25,10 @@ class AuthenticationActivity : AppCompatActivity() {
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
     ) { result: FirebaseAuthUIAuthenticationResult ->
+        Log.d(TAG, "registerForActivityResult")
         this.onSignInResult(result)
     }
 
-    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-        if (result.resultCode == RESULT_OK) {
-            // Successfully signed in
-            val user = FirebaseAuth.getInstance().currentUser
-            Log.d(TAG, "User ${user?.displayName} logged in")
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,15 +47,17 @@ class AuthenticationActivity : AppCompatActivity() {
 
     private fun observeAuthenticationState() {
         viewModel.authenticationState.observe(this, Observer { authenticationState ->
-            if(authenticationState == LoginViewModel.AuthenticationState.AUTHENTICATED){
+            if (authenticationState == LoginViewModel.AuthenticationState.AUTHENTICATED) {
                 //  Go to Reminder screen
                 val intent = Intent(this, RemindersActivity::class.java)
                 startActivity(intent)
                 finish()
             }
-
+            else
+            {
+                Log.d(TAG, "No User!")
+            }
         })
-
     }
 
     private fun launchSignInFlow() {
@@ -73,10 +69,19 @@ class AuthenticationActivity : AppCompatActivity() {
         val signInIntent = AuthUI
             .getInstance()
             .createSignInIntentBuilder()
+            .setIsSmartLockEnabled(false)
             .setAvailableProviders(providers)
             .build()
 
         signInLauncher.launch(signInIntent)
+    }
+
+    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
+        if (result.resultCode == RESULT_OK) {
+            // Successfully signed in
+            val user = FirebaseAuth.getInstance().currentUser
+            Log.d(TAG, "User ${user?.displayName} logged in")
+        }
     }
 
     companion object {

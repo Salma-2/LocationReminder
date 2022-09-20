@@ -1,12 +1,19 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
+import com.udacity.project4.authentication.AuthenticationActivity
+import com.udacity.project4.authentication.LoginViewModel
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
@@ -32,6 +39,8 @@ class ReminderListFragment : BaseFragment() {
         setTitle(getString(R.string.app_name))
 
         binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
+
+        observeAuthenticationState()
 
         return binding.root
     }
@@ -71,7 +80,7 @@ class ReminderListFragment : BaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.logout -> {
-//                TODO: add the logout implementation
+                logOut()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -84,4 +93,27 @@ class ReminderListFragment : BaseFragment() {
         inflater.inflate(R.menu.main_menu, menu)
     }
 
+    private fun logOut() {
+        val user = FirebaseAuth.getInstance().currentUser?.displayName
+        FirebaseAuth.getInstance().signOut()
+        Log.d(TAG, "User $user Logged out successfully")
+    }
+
+    private fun observeAuthenticationState() {
+        _viewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
+            if (authenticationState == RemindersListViewModel.AuthenticationState.UNAUTHENTICATED) {
+                //  Go to Login screen
+                val intent = Intent(requireActivity(), AuthenticationActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+
+            }
+
+        })
+
+    }
+
+    companion object {
+        private var TAG = ReminderListFragment::class.java.simpleName
+    }
 }
