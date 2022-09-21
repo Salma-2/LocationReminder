@@ -165,7 +165,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     }
 
-
     private fun enableMyLocation(): Boolean {
         return if (isPermissionGranted()) {
             Log.d(TAG, "Permission Granted!")
@@ -186,6 +185,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun setPoiClick(map: GoogleMap) {
         map.setOnPoiClickListener { poi ->
+            _viewModel.setPOI(poi)
+
             val poiMarker = map.addMarker(
                 MarkerOptions()
                     .position(poi.latLng)
@@ -198,6 +199,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun setMapLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
+            _viewModel.setLatLng(latLng.latitude, latLng.longitude)
+
             // A Snippet is Additional text that's displayed below the title.
             val snippet = String.format(
                 Locale.getDefault(),
