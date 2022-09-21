@@ -10,6 +10,7 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
+import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 
@@ -47,14 +48,20 @@ class SaveReminderFragment : BaseFragment() {
             val location = _viewModel.reminderSelectedLocationStr.value
             val latitude = _viewModel.latitude.value
             val longitude = _viewModel.longitude.value
-            val poi = _viewModel.selectedPOI.value
 
-            Log.d(TAG, "lat $latitude lng $longitude poi: ${poi?.name}")
+            Log.d(TAG, "LatLng : $latitude, $longitude location name: $location")
 
-
-//            TODO: use the user entered reminder details to:
+//           use the user entered reminder details to
+            val reminderData = ReminderDataItem(
+                title,
+                description,
+                location,
+                latitude,
+                longitude
+            )
 //             1) add a geofencing request
 //             2) save the reminder to the local db
+            _viewModel.validateAndSaveReminder(reminderData)
         }
     }
 

@@ -185,7 +185,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun setPoiClick(map: GoogleMap) {
         map.setOnPoiClickListener { poi ->
-            _viewModel.setPOI(poi)
+            _viewModel.setLatLng(poi.latLng, poi.name)
 
             val poiMarker = map.addMarker(
                 MarkerOptions()
@@ -199,7 +199,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun setMapLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
-            _viewModel.setLatLng(latLng.latitude, latLng.longitude)
+            _viewModel.setLatLng(latLng, getString(R.string.dropped_pin))
 
             // A Snippet is Additional text that's displayed below the title.
             val snippet = String.format(
