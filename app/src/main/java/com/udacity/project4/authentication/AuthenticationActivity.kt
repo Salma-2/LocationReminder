@@ -23,9 +23,7 @@ class AuthenticationActivity : AppCompatActivity() {
     private val viewModel by viewModels<LoginViewModel>()
 
     private val signInLauncher = registerForActivityResult(
-        FirebaseAuthUIActivityResultContract()
-    ) { _: FirebaseAuthUIAuthenticationResult ->
-    }
+        FirebaseAuthUIActivityResultContract()) {}
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,9 +48,7 @@ class AuthenticationActivity : AppCompatActivity() {
                 val intent = Intent(this, RemindersActivity::class.java)
                 startActivity(intent)
                 finish()
-            }
-            else
-            {
+            } else {
                 Log.d(TAG, "No User!")
             }
         })
@@ -72,14 +68,6 @@ class AuthenticationActivity : AppCompatActivity() {
             .build()
 
         signInLauncher.launch(signInIntent)
-    }
-
-    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-        if (result.resultCode == RESULT_OK) {
-            // Successfully signed in
-            val user = FirebaseAuth.getInstance().currentUser
-            Log.d(TAG, "User ${user?.displayName} logged in")
-        }
     }
 
     companion object {
