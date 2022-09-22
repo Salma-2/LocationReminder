@@ -21,6 +21,7 @@ import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
+import com.udacity.project4.locationreminders.geofence.GeofenceTransitionsJobIntentService
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.GeofencingConstants
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
@@ -79,7 +80,9 @@ class SaveReminderFragment : BaseFragment() {
             _viewModel.validateAndSaveReminder(reminderData)
 
             //       2) add a geofencing request
-            addGeofence(reminderData)
+            if (_viewModel.validateEnteredData(reminderData)) {
+                addGeofence(reminderData)
+            }
 
         }
     }
@@ -116,7 +119,7 @@ class SaveReminderFragment : BaseFragment() {
                     Log.d(TAG, "Added geofence successfully")
                 }
                 addOnFailureListener {
-                    Log.d(TAG, "Failed to add a geofence")
+                    Log.d(TAG, getString(R.string.error_adding_geofence))
                 }
             }
         }
