@@ -2,8 +2,6 @@ package com.udacity.project4.locationreminders
 
 import android.Manifest
 import android.annotation.TargetApi
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -12,20 +10,14 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.GeofencingClient
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.*
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
-import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import kotlinx.android.synthetic.main.activity_reminders.*
 
 /**
@@ -42,18 +34,11 @@ private val runningQOrLater = android.os.Build.VERSION.SDK_INT >=
         android.os.Build.VERSION_CODES.Q
 
 class RemindersActivity : AppCompatActivity() {
-    private lateinit var geofencingClient: GeofencingClient
-    private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(this, GeofenceBroadcastReceiver::class.java)
-        intent.action = ACTION_GEOFENCE_EVENT
-        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reminders)
 
-        geofencingClient = LocationServices.getGeofencingClient(this)
     }
 
     override fun onStart() {
@@ -61,11 +46,12 @@ class RemindersActivity : AppCompatActivity() {
         checkPermissions()
     }
 
-    private fun checkPermissions() {
-        if (foregroundAndBackgroundLocationPermissionApproved()) {
+    private fun checkPermissions(): Boolean {
+        return if (foregroundAndBackgroundLocationPermissionApproved()) {
             checkDeviceLocationSettings()
         } else {
             requestForegroundAndBackgroundLocationPermissions()
+            false
         }
     }
 
@@ -131,39 +117,39 @@ class RemindersActivity : AppCompatActivity() {
         Log.d(TAG, "onRequestPermissionResult")
 
 
-            if (
-                grantResults.isEmpty() ||
-                grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED ||
-                (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE &&
-                        grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] ==
-                        PackageManager.PERMISSION_DENIED)
-            ) {
-                Snackbar.make(
-                    findViewById(R.id.constraintLayout),
-                    R.string.permission_denied_explanation,
-                    Snackbar.LENGTH_INDEFINITE
-                )
-                    .setAction(R.string.settings) {
-                        startActivity(Intent().apply {
-                            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                            data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        if (
+            grantResults.isEmpty() ||
+            grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED ||
+            (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE &&
+                    grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] ==
+                    PackageManager.PERMISSION_DENIED)
+        ) {
+            Snackbar.make(
+                findViewById(R.id.constraintLayout),
+                R.string.permission_denied_explanation,
+                Snackbar.LENGTH_INDEFINITE
+            )
+                .setAction(R.string.settings) {
+                    startActivity(Intent().apply {
+                        action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-                        })
-                    }.show()
+                    })
+                }.show()
 
-            } else {
-                checkDeviceLocationSettings()
-            }
+        } else {
+            checkDeviceLocationSettings()
+        }
     }
 
-    // Todo: modify  addOnCompleteListener
-    private fun checkDeviceLocationSettings(resolve: Boolean = true) {
+    private fun checkDeviceLocationSettings(resolve: Boolean = true): Boolean {
         val locationRequest = LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_LOW_POWER
         }
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val settingsClient = LocationServices.getSettingsClient(this)
+        var flag = false
         val locationSettingsResponseTask =
             settingsClient.checkLocationSettings(builder.build())
 
@@ -187,9 +173,10 @@ class RemindersActivity : AppCompatActivity() {
 
         locationSettingsResponseTask.addOnCompleteListener {
             if (it.isSuccessful) {
-//                addGeofenceForClue()
+                flag = true
             }
         }
+        return flag
 
     }
 
@@ -200,9 +187,5 @@ class RemindersActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        internal const val ACTION_GEOFENCE_EVENT =
-            "remindersactivity.action.ACTION_GEOFENCE_EVENT"
-    }
 }
 
