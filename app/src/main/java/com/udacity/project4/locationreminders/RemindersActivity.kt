@@ -33,6 +33,7 @@ private var TAG = RemindersActivity::class.java.simpleName
 private val runningQOrLater = android.os.Build.VERSION.SDK_INT >=
         android.os.Build.VERSION_CODES.Q
 
+
 class RemindersActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,14 +45,14 @@ class RemindersActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         checkPermissions()
+
     }
 
-    private fun checkPermissions(): Boolean {
-        return if (foregroundAndBackgroundLocationPermissionApproved()) {
+    private fun checkPermissions() {
+        if (foregroundAndBackgroundLocationPermissionApproved()) {
             checkDeviceLocationSettings()
         } else {
             requestForegroundAndBackgroundLocationPermissions()
-            false
         }
     }
 
@@ -143,13 +144,12 @@ class RemindersActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkDeviceLocationSettings(resolve: Boolean = true): Boolean {
+    private fun checkDeviceLocationSettings(resolve: Boolean = true) {
         val locationRequest = LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_LOW_POWER
         }
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val settingsClient = LocationServices.getSettingsClient(this)
-        var flag = false
         val locationSettingsResponseTask =
             settingsClient.checkLocationSettings(builder.build())
 
@@ -171,12 +171,12 @@ class RemindersActivity : AppCompatActivity() {
             }
         }
 
-        locationSettingsResponseTask.addOnCompleteListener {
-            if (it.isSuccessful) {
-                flag = true
-            }
-        }
-        return flag
+//        locationSettingsResponseTask.addOnCompleteListener {
+//            if (it.isSuccessful) {
+//
+//            }
+//        }
+
 
     }
 

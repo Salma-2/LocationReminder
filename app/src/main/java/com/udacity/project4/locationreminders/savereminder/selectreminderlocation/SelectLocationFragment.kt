@@ -162,6 +162,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
         } else {
             Log.d(TAG, "Request Permission")
+            map.setMyLocationEnabled(false)
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
