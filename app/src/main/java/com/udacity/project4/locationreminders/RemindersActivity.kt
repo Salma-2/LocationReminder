@@ -129,8 +129,7 @@ class RemindersActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         Log.d(TAG, "onRequestPermissionResult")
-        Log.d(TAG, "fg location : ${grantResults[0]}")
-        Log.d(TAG, "bg location: ${grantResults[1]}")
+
 
             if (
                 grantResults.isEmpty() ||

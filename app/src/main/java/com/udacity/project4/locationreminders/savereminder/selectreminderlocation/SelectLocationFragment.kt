@@ -11,6 +11,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.location.*
@@ -49,15 +50,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             ActivityResultContracts.RequestPermission()
         ) { isGranted ->
             if (isGranted) {
-                val enabled = enableMyLocation()
-                if (enabled) {
-                    fusedLocationProviderClient
-                        .requestLocationUpdates(
-                            locationRequest,
-                            locationCallback,
-                            Looper.getMainLooper()
-                        )
-                }
+                enableMyLocation()
             }
         }
 
@@ -73,7 +66,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
-        //add the map setup implementation
+        // add the map setup implementation
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -99,9 +92,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             }
         }
 
-
-//        TODO: add style to the map
-//        TODO: put a marker to location that the user selected
 
 //        TODO: call this function after the user confirms on the selected location
         onLocationSelected()
@@ -144,15 +134,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         Log.d(TAG, "onMapReady")
         map = googleMap
 
-        val enabled = enableMyLocation()
-        if (enabled) {
-            fusedLocationProviderClient
-                .requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    Looper.getMainLooper()
-                )
-        }
+       enableMyLocation()
 
         setPoiClick(map)
         setMapLongClick(map)
@@ -165,16 +147,39 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     }
 
-    private fun enableMyLocation(): Boolean {
-        return if (isPermissionGranted()) {
+    private fun enableMyLocation() {
+        if (isPermissionGranted()) {
             Log.d(TAG, "Permission Granted!")
             map.setMyLocationEnabled(true)
-            true
+
         } else {
             Log.d(TAG, "Request Permission")
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            false
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (ActivityCompat.checkSelfPermission(requireActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationProviderClient
+                .requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+        }
+
+    }
+
+    override fun onPause() {
+        if (ActivityCompat.checkSelfPermission(requireActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+        }
+        super.onPause()
     }
 
     private fun isPermissionGranted(): Boolean {
