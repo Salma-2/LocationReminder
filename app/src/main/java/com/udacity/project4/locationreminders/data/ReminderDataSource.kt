@@ -1,5 +1,6 @@
 package com.udacity.project4.locationreminders.data
 
+import androidx.annotation.VisibleForTesting
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 
@@ -11,4 +12,6 @@ interface ReminderDataSource {
     suspend fun saveReminder(reminder: ReminderDTO)
     suspend fun getReminder(id: String): Result<ReminderDTO>
     suspend fun deleteAllReminders()
+    @VisibleForTesting
+    fun setReturnError(value: Boolean)
 }

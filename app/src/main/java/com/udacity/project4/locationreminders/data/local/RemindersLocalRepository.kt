@@ -65,4 +65,7 @@ class RemindersLocalRepository(
             remindersDao.deleteAllReminders()
         }
     }
+
+    override fun setReturnError(value: Boolean) {
+    }
 }

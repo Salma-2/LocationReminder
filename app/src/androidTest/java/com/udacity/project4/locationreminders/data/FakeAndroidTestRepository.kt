@@ -3,35 +3,39 @@ package com.udacity.project4.locationreminders.data
 import androidx.annotation.VisibleForTesting
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result.Success
+import com.udacity.project4.locationreminders.data.dto.Result.Error
 import com.udacity.project4.locationreminders.data.dto.Result
 
 
-//Use FakeDataSource that acts as a test double to the LocalDataSource
-class FakeDataSource : ReminderDataSource {
+class FakeAndroidTestRepository : ReminderDataSource {
     private var reminders: LinkedHashMap<String, ReminderDTO> = LinkedHashMap()
     private var shouldReturnError = false
 
     @VisibleForTesting
-    fun setReturnError(value: Boolean) {
+    override fun setReturnError(value: Boolean) {
         shouldReturnError = value
     }
 
-//   Create a fake data source to act as a double to the real data source
 
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
+        if (shouldReturnError) {
+            return Error("Test exception")
+        }
         return Success(reminders.values.toList())
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
-        reminders[reminder.id] = reminder }
+        reminders[reminder.id] = reminder
+    }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        if (!shouldReturnError) {
-            reminders[id]?.let {
-                return Success(it)
-            }
+        if (shouldReturnError) {
+            return Error("Test exception")
         }
-        return Result.Error("Test Exception")
+        reminders[id]?.let {
+            return Success(it)
+        }
+        return Error("Could not find task")
     }
 
     override suspend fun deleteAllReminders() {

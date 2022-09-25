@@ -73,6 +73,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireActivity())
 
@@ -98,6 +99,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         binding.saveLocationBtn.setOnClickListener {
             onLocationSelected(selectedLatLng, selectedLocation)
         }
+
 
 
         return binding.root
