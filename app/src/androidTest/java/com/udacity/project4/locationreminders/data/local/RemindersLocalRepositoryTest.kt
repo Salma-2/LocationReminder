@@ -9,6 +9,7 @@ import androidx.test.filters.MediumTest
 import com.udacity.project4.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
+import com.udacity.project4.locationreminders.data.dto.Result.Error
 import com.udacity.project4.locationreminders.data.dto.Result.Success
 import com.udacity.project4.locationreminders.data.dto.succeeded
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
@@ -77,6 +78,14 @@ class RemindersLocalRepositoryTest {
         assertThat(result.data.location, `is`(reminder.location))
 
 
+    }
+
+    @Test
+    fun getReminderWithInvalidId_reminderNotFound() = runBlocking {
+        val loaded = localDataSource.getReminder("invalidId")
+        assertThat(loaded.succeeded, `is`(false))
+        loaded as Error
+        assertThat(loaded.exception, `is`("Reminder not found!"))
     }
 
 }
