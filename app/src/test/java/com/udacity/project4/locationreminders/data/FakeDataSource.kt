@@ -19,6 +19,9 @@ class FakeDataSource : ReminderDataSource {
 //   Create a fake data source to act as a double to the real data source
 
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
+        if (shouldReturnError) {
+            return Result.Error("Test exception")
+        }
         return Success(reminders.values.toList())
     }
 

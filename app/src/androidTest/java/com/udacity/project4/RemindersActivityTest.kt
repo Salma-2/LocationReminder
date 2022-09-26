@@ -121,6 +121,9 @@ class RemindersActivityTest :
         IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
     }
 
+    @After
+    fun clearAll() = runBlocking { repository.deleteAllReminders() }
+
 
     @Test
     fun addReminder() = runBlocking {
@@ -143,7 +146,7 @@ class RemindersActivityTest :
 
         // Adding the new reminder
         onView(withId(R.id.reminderTitle)).perform(replaceText("Title"))
-        onView(withId(R.id.reminderDescription)).perform(replaceText("Description!!"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("Description"))
 
         // selecting the location
         onView(withId(R.id.selectLocation)).perform(click())
