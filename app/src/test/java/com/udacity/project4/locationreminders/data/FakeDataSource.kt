@@ -12,7 +12,7 @@ class FakeDataSource : ReminderDataSource {
     private var shouldReturnError = false
 
     @VisibleForTesting
-    fun setReturnError(value: Boolean) {
+    override fun setReturnError(value: Boolean) {
         shouldReturnError = value
     }
 

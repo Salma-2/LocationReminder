@@ -13,6 +13,7 @@ import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -22,6 +23,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
+import com.google.android.material.internal.ContextUtils.getActivity
 
 import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
@@ -34,6 +36,7 @@ import com.udacity.project4.locationreminders.reminderslist.toReminderDto
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorActivity
+import com.udacity.project4.utils.EspressoIdlingResource
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -46,6 +49,7 @@ import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.not
 
 
@@ -97,15 +101,24 @@ class RemindersActivityTest :
         }
     }
 
+    /**
+     * Idling resources tell Espresso that the app is idle or busy. This is needed when operations
+     * are not scheduled in the main Looper (for example when executed on a different thread).
+     */
     @Before
     fun registerIdlingResource() {
         IdlingRegistry.getInstance().register(dataBindingIdlingResource)
+        IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
 
     }
 
+    /**
+     * Unregister your Idling Resource so it can be garbage collected and does not leak any memory.
+     */
     @After
     fun unregisterIdlingResource() {
         IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
+        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
     }
 
 
@@ -120,6 +133,13 @@ class RemindersActivityTest :
 
         // Navigate to add New reminder
         onView(withId(R.id.addReminderFAB)).perform(click())
+
+        // GIVEN title is Empty - WHEN click save - THEN a snackbar displayed
+        onView(withId(R.id.saveReminder)).perform(click())
+        onView(withId(R.id.snackbar_text))
+            .check(
+                matches(isDisplayed())
+            )
 
         // Adding the new reminder
         onView(withId(R.id.reminderTitle)).perform(replaceText("Title"))
@@ -137,6 +157,12 @@ class RemindersActivityTest :
         // save location and reminder
         onView(withId(R.id.save_location_btn)).perform(click())
         onView(withId(R.id.saveReminder)).perform(click())
+
+        // Check is the TOAST displayed
+        onView(withText(R.string.reminder_saved))
+            .inRoot(withDecorView(not(`is`(getActivity(appContext)?.window?.decorView))))
+            .check(matches(isDisplayed()))
+
 
         // CHECK saving
         onView(withId(R.id.reminderssRecyclerView))
