@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -164,6 +165,11 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
         } else {
             Log.d(TAG, "Request Permission")
+
+            Toast.makeText(requireActivity(),
+                R.string.permission_denied_explanation,
+                Toast.LENGTH_SHORT).show()
+
             map.setMyLocationEnabled(false)
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
